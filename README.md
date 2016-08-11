@@ -2,36 +2,22 @@
 Fill your database with mocked instances.
 
 
-## Usage
+## Usage with [`fake-factory`](https://github.com/joke2k/faker)
 
 ```python
 
-wrapper = ModelWrapper(MyModel)
+    factory = faker.Factory.create()
+    if not TestModel.table_exists():
+        TestModel.create_table()
 
-wrapper.username = FieldSpec(Fields.username)
-wrapper.email = FieldSpec(Fields.email)
-wrapper.ip_addr = FieldSpec(Fields.ipv4, private=True)
-wrapper.real_name = FieldSpec(Fields.full_name)
+    wrapper = ModelWrapper(TestModel)
 
-wrapper.generate(100)
+    wrapper.TestModel.client_name = FieldSpec(factory.name)
+    wrapper.TestModel.password_hash = FieldSpec(factory.binary, length=75)
+    wrapper.TestModel.email = FieldSpec(factory.email)
+    wrapper.TestModel.description = FieldSpec(factory.text)
+    wrapper.TestModel.visits = FieldSpec(factory.pyint)
 
-```
+    wrapper.generate(1000)
 
-
-```python
-
-wrapper_group = ModelWrapperGroup(
-    Users, Comments, Pictures
-)
-
-wrapper_group.Users.username = FieldSpec(Fields.username)
-wrapper_group.Users.email = FieldSpec(Fields.email)
-
-wrapper_group.Comments.text = FieldSpec(Fields.lorem, phrases=2)
-wrapper_group.Comments.posted = FieldSpec(Fields.datetime)
-
-wrapper_group.Pictures.src = FieldSpec(Fields.avatar)
-wrapper_group.Pictures.description = FieldSpec(Fields.lorem, words=20)
-
-wrapper_group.generate(100, 200, 320)
 ```

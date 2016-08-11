@@ -59,10 +59,13 @@ class Fields:
 
 class FieldSpec:
 
-    def __init__(self, field, *args, **kwargs):
-        self.field = field
+    def __init__(self, func, *args, **kwargs):
+        self.func = func
         self.args = args
         self.kwargs = kwargs
 
     def __repr__(self):
-        return "<FieldSpec field={} args={} kwargs={}>".format(self.field, self.args, self.kwargs)
+        return "<FieldSpec func={} args={} kwargs={}>".format(self.func, self.args, self.kwargs)
+
+    def call(self):
+        return self.func(*self.args, **self.kwargs)

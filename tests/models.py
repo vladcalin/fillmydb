@@ -4,8 +4,13 @@ _db = peewee.SqliteDatabase("test.db")
 
 
 class TestModel(peewee.Model):
-    username = peewee.CharField()
-    password_hash = peewee.CharField()
+    client_name = peewee.CharField()
+    password_hash = peewee.BlobField()
+
+    email = peewee.CharField()
+    visits = peewee.IntegerField()
+
+    description = peewee.CharField()
 
     class Meta:
         database = _db
