@@ -3,8 +3,9 @@ import peewee
 _db = peewee.SqliteDatabase("test.db")
 
 
-class TestModel(peewee.Model):
-    client_name = peewee.CharField()
+class User(peewee.Model):
+    name = peewee.CharField()
+    username = peewee.CharField()
     password_hash = peewee.BlobField()
 
     email = peewee.CharField()
@@ -14,3 +15,15 @@ class TestModel(peewee.Model):
 
     class Meta:
         database = _db
+
+
+class Post(peewee.Model):
+    title = peewee.CharField()
+    text = peewee.CharField()
+
+    by_user = peewee.ForeignKeyField(User)
+
+
+class Like(peewee.Model):
+    by_user = peewee.ForeignKeyField(User)
+    to_post = peewee.ForeignKeyField(Post)
