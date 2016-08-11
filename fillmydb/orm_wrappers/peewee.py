@@ -13,3 +13,6 @@ class PeeweeModelWrapper:
             if isinstance(attr, peewee.Field):
                 fields.append(field)
         return fields
+
+    def create_instance(self, **fields):
+        self.model.create(**fields)

@@ -19,6 +19,9 @@ except ImportError:
     print("Unable to import sqlalchemy. Not checking for sqlalchemy models")
     sqlalchemy = None
 
+import time
+
+
 from fillmydb.consts import ModelType, Fields, FieldSpec, Provider
 from fillmydb.errors import InvalidModelError
 from fillmydb.providers import FakeFactoryProvider
@@ -60,20 +63,29 @@ class ModelWrapper:
     def resolve_field(self, field_spec):
         return self.provider.resolve_field(field_spec)
 
-    def generate_one_instance(self):
+    def generate_field_values(self):
         fields_vals = {}
         for field in self._fields:
             fields_vals[field] = self.resolve_field(getattr(getattr(self, self.model.__name__), field))
-        return self.model(**fields_vals)
+        return fields_vals
+
+    def generate(self, count):
+        _start = time.time()
+        for _ in range(count):
+            self._internal_wrapper.create_instance(**self.generate_field_values())
+        print("Generation complete in {} seconds".format(time.time() - _start))
+
 
 
 if __name__ == '__main__':
     from tests.models import TestModel
 
+    if not TestModel.table_exists():
+        TestModel.create_table()
+
     wrapper = ModelWrapper(TestModel)
 
-    print(wrapper.TestModel)
-
     wrapper.TestModel.username = FieldSpec(Fields.name)
+    wrapper.TestModel.password_hash = FieldSpec(Fields.md5)
 
-    print(wrapper.generate_one_instance())
+    wrapper.generate(1000)

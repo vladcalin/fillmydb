@@ -6,7 +6,9 @@ class FakeFactoryProvider:
         0: "name",
         1: "name_female",
         2: "name_male",
-        3: "last_name"
+        3: "last_name",
+
+        27: "md5"
     }
 
     def __init__(self, localisation="en_GB"):
