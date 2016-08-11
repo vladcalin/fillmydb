@@ -10,8 +10,6 @@ Fill your database with mocked instances.
     if not TestModel.table_exists():
         TestModel.create_table()
 
-    wrapper = ModelWrapper(TestModel)
-
     wrapper.TestModel.client_name = FieldSpec(factory.name)
     wrapper.TestModel.password_hash = FieldSpec(factory.binary, length=75)
     wrapper.TestModel.email = FieldSpec(factory.email)
