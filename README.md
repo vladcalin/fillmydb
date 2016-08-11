@@ -8,10 +8,10 @@ Fill your database with mocked instances.
 
 wrapper = ModelWrapper(MyModel)
 
-wrapper.username = FieldSpec(Fields.username)
-wrapper.email = FieldSpec(Fields.email)
-wrapper.ip_addr = FieldSpec(Fields.ipv4, private=True)
-wrapper.real_name = FieldSpec(Fields.full_name)
+wrapper.MyModel.username = FieldSpec(Fields.username)
+wrapper.MyModel.email = FieldSpec(Fields.email)
+wrapper.MyModel.ip_addr = FieldSpec(Fields.ipv4, private=True)
+wrapper.MyModel.real_name = FieldSpec(Fields.full_name)
 
 wrapper.generate(100)
 
