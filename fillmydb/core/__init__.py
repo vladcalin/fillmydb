@@ -9,11 +9,19 @@ except ImportError:
 
 class ModelWrapper:
     class _ProcessingQueue:
+        """
+        The processing queue class that manages the processing order of the models.
+        """
 
         def __init__(self, *handlers):
             self.handlers = list(handlers)
 
         def initial_order(self):
+            """
+            Orders the queue so that the first processed are the models with fewest dependencies. Expected to be
+            processed first the models with no dependencies.
+            :return:
+            """
             self.handlers.sort(key=lambda model: len(model.ref_models), reverse=True)
 
         def get_next_item(self):
@@ -21,12 +29,19 @@ class ModelWrapper:
             return item
 
         def put_item_back(self, item):
+            """
+            Inserts the item to the end of the queue.
+            :param item: an ModelHandler instance
+            """
             self.handlers.insert(0, item)
 
         def __len__(self):
             return len(self.handlers)
 
     class _ModelSpecs(object):
+        """
+        A class that encapsulates the specifications of the fields of the model.
+        """
 
         def __init__(self, handler):
             self._model = handler.model
@@ -43,18 +58,30 @@ class ModelWrapper:
                 ["{}={}".format(field, getattr(self, field)) for field in self._fields]))
 
     def __init__(self, *models):
+        # used for determining how many instances of each model should generate
         self._initial_order = models
+
+        # the wrapped model instances in specific handlers
         self._handlers = {
             model: self._get_model_handler(model) for model in models
             }
+
+        # the model specifications
         self._specs = {
             model: self._ModelSpecs(self._handlers[model]) for model in models
             }
+
+        # flags that shows if a specific model was processed or not
         self._processed = {
             model: False for model in models
             }
 
     def __getitem__(self, item):
+        """
+        Returns the model specification
+        :param item:
+        :return:
+        """
         if item in self._specs:
             return self._specs[item]
         raise KeyError("No model {} found".format(item))
@@ -64,12 +91,20 @@ class ModelWrapper:
             return PeeweeHandler(model)
 
     def model_has_unresolved_reference(self, model):
+        """
+        Determines if the model has unresolved referenced models. This is needed because in order to generate
+        instances of a model, first we must generate instances of the models that are referenced through foreign keys.
+        """
         for ref_model in self._handlers[model].ref_models:
             if not self._processed[ref_model]:
                 return True
         return False
 
     def generate(self, *counts):
+        """
+        Generates and persists items. *counts* is a list of integers that indicate how many instances of each model
+        should generate. The order is preserved from the models specified in constructor.
+        """
         queue = self._ProcessingQueue(*self._handlers.values())
         queue.initial_order()
         while len(queue) != 0:
@@ -84,6 +119,12 @@ class ModelWrapper:
             self._processed[item.model] = True
 
     def generate_instances(self, handler, count):
+        """
+        Generates *count* instances of the model wrapped in *handler*. Only for internal use.
+        :param handler:
+        :param count:
+        :return:
+        """
         for _ in range(count):
             generated = {}
             for field_name in handler.fields_names:
@@ -102,7 +143,13 @@ class ModelWrapper:
 
 
 class FieldSpec:
+    """
+    The generation logic for mock values for fields.
+    """
     def __init__(self, func, *args, **kwargs):
+        """
+        The mocked values of the fields will be generated as func(*args, **kwargs)
+        """
         self.func = func
         self.args = args
         self.kwargs = kwargs
