@@ -7,6 +7,9 @@ like and then generate how many instances you want of each model.
 
 ## Usage with [`fake-factory`](https://github.com/joke2k/faker)
 
+
+Generating instances for a single model:
+
 ```python
 
     import faker
@@ -24,6 +27,8 @@ like and then generate how many instances you want of each model.
     item = wrapper.generate(100)
 
 ```
+
+Generating instances for multipe models:
 
 ```python
 
@@ -45,12 +50,14 @@ like and then generate how many instances you want of each model.
     wrapper[Post].title = FieldSpec(lambda _: "test", 1)
     wrapper[Post].text = FieldSpec(factory.text)
 
-    wrapper.generate(10, 10, 10)
-
+    # generating 10 users, 100 likes and 20 posts 
+    wrapper.generate(10, 100, 20)
 
 ```
 
 ## General workflow
+
+Pseudo-code:
 
 ```python
 initial_to_order_queue()
