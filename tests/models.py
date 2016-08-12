@@ -23,7 +23,13 @@ class Post(peewee.Model):
 
     by_user = peewee.ForeignKeyField(User)
 
+    class Meta:
+        database = _db
+
 
 class Like(peewee.Model):
     by_user = peewee.ForeignKeyField(User)
     to_post = peewee.ForeignKeyField(Post)
+
+    class Meta:
+        database = _db

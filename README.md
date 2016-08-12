@@ -22,6 +22,31 @@ Fill your database with mocked instances.
 
 ```
 
+```python
+
+	from tests.models import User, Post, Like
+
+    import faker
+
+    factory = faker.Factory.create()
+
+    wrapper = ModelWrapper(User, Like, Post)
+
+    wrapper[User].name = FieldSpec(factory.name)
+    wrapper[User].username = FieldSpec(factory.user_name)
+    wrapper[User].description = FieldSpec(factory.text)
+    wrapper[User].password_hash = FieldSpec(factory.binary, length=25)
+    wrapper[User].email = FieldSpec(factory.email)
+    wrapper[User].visits = FieldSpec(factory.pyint)
+
+    wrapper[Post].title = FieldSpec(lambda _: "test", 1)
+    wrapper[Post].text = FieldSpec(factory.text)
+
+    wrapper.generate(10, 10, 10)
+
+
+```
+
 ## General workflow
 
 ```python

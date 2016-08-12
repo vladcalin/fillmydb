@@ -8,104 +8,98 @@ except ImportError:
 
 
 class ModelWrapper:
-    class _FieldsStates:
+    class _ProcessingQueue:
 
-        def __init__(self, model):
-            self._fields = []
-            self._model_name = model.__name__
+        def __init__(self, *handlers):
+            self.handlers = list(handlers)
 
-        def init_fields(self, *fields):
-            """
-            Initializes the fields of the instance.
-            :param fields: a list of strings representing the field names
-            :return: None
-            """
-            self._fields = fields
-            for field in fields:
+        def initial_order(self):
+            self.handlers.sort(key=lambda model: len(model.ref_models), reverse=True)
+
+        def get_next_item(self):
+            item = self.handlers.pop()
+            return item
+
+        def put_item_back(self, item):
+            self.handlers.insert(0, item)
+
+        def __len__(self):
+            return len(self.handlers)
+
+    class _ModelSpecs(object):
+
+        def __init__(self, handler):
+            self._model = handler.model
+            self._fields = handler.fields_names
+
+            for field in self._fields:
                 setattr(self, field, None)
 
+        def get_field_specs(self):
+            return {field: getattr(self, field) for field in self._fields}
+
         def __repr__(self):
-            return "<_FieldsStates({})\n\t{}>".format(
-                self._model_name, "\n\t".join(["{}={}".format(field, getattr(self, field)) for field in
-                                               self._fields]))
+            return "<ModelSpecs({}) {}>".format(self._model.__name__, ", ".join(
+                ["{}={}".format(field, getattr(self, field)) for field in self._fields]))
 
     def __init__(self, *models):
-        self._models = [(model.__name__, model, self.get_model_handler(model), self._FieldsStates(model)) for model in
-                        models]
-        for model_name, model, model_handler, fields_specs in self._models:
-            fields_specs.init_fields(*model_handler.get_field_names())
-        self._priorities = None
-        self.compute_priorities()
-
-        self._has_been_processed = [False for _ in range(len(self._models))]
+        self._initial_order = models
+        self._handlers = {
+            model: self._get_model_handler(model) for model in models
+            }
+        self._specs = {
+            model: self._ModelSpecs(self._handlers[model]) for model in models
+            }
+        self._processed = {
+            model: False for model in models
+            }
 
     def __getitem__(self, item):
-        if isinstance(item, str):
-            name = item
-        else:
-            name = item.__name__
+        if item in self._specs:
+            return self._specs[item]
+        raise KeyError("No model {} found".format(item))
 
-        items = [x for x in self._models if x[0] == name]
-        if not items:
-            raise KeyError("Model {} not found".format(name))
-
-        return items[0][3]
-
-    def get_model_handler(self, model):
+    def _get_model_handler(self, model):
         if peewee and issubclass(model, peewee.Model):
             return PeeweeHandler(model)
 
-    def generate_one_instance(self, model):
-        items = [x for x in self._models if x[0] == model.__name__]
-        if not items:
-            raise ValueError("Model {} not registered in this wrapper".format(model.__name__))
-
-        name, model, handler, fields_states = items[0]
-
-        generated_values = {}
-        for field_name in handler.get_field_names():
-            spec = getattr(fields_states, field_name, None)
-            if spec:
-                generated_values[field_name] = spec.resolve()
-            else:
-                if not field_name == "id":
-                    print("Attribute with no specification in {}: {}".format(name, field_name))
-                generated_values[field_name] = None
-        return handler.create_instance_and_persist(**generated_values)
-
-    def compute_priorities(self):
-        self._priorities = []
-        for name, model, handler, fields_states in self._models:
-            self._priorities.append((len(handler.get_model_dependencies()), model))
-        self._priorities.sort(key=lambda x: x[0], reverse=True)
-
-    def generate(self, *counts):
-        if len(counts) != len(self._models):
-            raise ValueError("Invalid number of items to generate, number of 'counts' must match the number of models")
-        while not all(self._has_been_processed):
-            to_process = self._priorities.pop()
-
-            name, model, handler, specs = self._get_model_item(to_process[1].__name__)
-            if self.model_has_unsolved_deps(model):
-                self._priorities.insert(0, to_process)
-
-    def model_has_unsolved_deps(self, model):
-        name, model, handler, specs = self._get_model_item(model.__name__)
-        deps = handler.get_model_dependencies()
-        for dep in deps:
-            if not self._has_been_processed[self._get_model_index(dep.__name__)]:
-                print("Found unresolved dependency for {} : {}".format(name, dep.__name__))
+    def model_has_unresolved_reference(self, model):
+        for ref_model in self._handlers[model].ref_models:
+            if not self._processed[ref_model]:
                 return True
         return False
 
-    def _get_model_item(self, model_name):
-        return [x for x in self._models if x[0] == model_name][0]
+    def generate(self, *counts):
+        queue = self._ProcessingQueue(*self._handlers.values())
+        queue.initial_order()
+        while len(queue) != 0:
+            item = queue.get_next_item()
+            if self.model_has_unresolved_reference(item.model):
+                queue.put_item_back(item)
+                continue
 
-    def _get_model_index(self, model_name):
-        for i, vals in enumerate(self._models):
-            if vals[0] == model_name:
-                return i
-        raise KeyError("{} not found".format(model_name))
+            count = counts[self._initial_order.index(item.model)]
+            print("Generating {} instances of {}".format(count, item.model.__name__))
+            self.generate_instances(item, count)
+            self._processed[item.model] = True
+
+    def generate_instances(self, handler, count):
+        for _ in range(count):
+            generated = {}
+            for field_name in handler.fields_names:
+                if handler.is_value_field(field_name):
+                    # resolving normal field
+                    field_spec = getattr(self._specs[handler.model], field_name)
+                    if not field_spec:
+                        generated[field_name] = None
+                    else:
+                        generated[field_name] = field_spec.resolve()
+                else:
+                    # resolving foreign key field
+                    generated[field_name] = self._handlers[
+                        handler.get_referenced_model_by_field_name(field_name)].pick_random_instance()
+            handler.create_instance_and_persist(**generated)
+
 
 class FieldSpec:
     def __init__(self, func, *args, **kwargs):
@@ -138,4 +132,7 @@ if __name__ == '__main__':
     wrapper[User].email = FieldSpec(factory.email)
     wrapper[User].visits = FieldSpec(factory.pyint)
 
-    wrapper.generate(5, 5, 5)
+    wrapper[Post].title = FieldSpec(lambda _: "test", 1)
+    wrapper[Post].text = FieldSpec(factory.text)
+
+    wrapper.generate(10, 10, 10)
