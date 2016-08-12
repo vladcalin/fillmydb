@@ -1,6 +1,9 @@
 # fillmydb
 Fill your database with mocked instances.
 
+Wrap you ORM model into a `ModelWrapper`, specify how your fields should look
+like and then generate how many instances you want of each model.
+
 
 ## Usage with [`fake-factory`](https://github.com/joke2k/faker)
 

@@ -1,7 +1,11 @@
 import peewee
 
+from fillmydb.handlers.base_handler import BaseHandler
 
-class PeeweeHandler:
+
+class PeeweeHandler(BaseHandler):
+    DB_TYPE = "peewee"
+
     def __init__(self, model):
         self.model = model
 

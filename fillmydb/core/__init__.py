@@ -76,6 +76,17 @@ class ModelWrapper:
             model: False for model in models
             }
 
+        self._validate_models()
+
+    def _validate_models(self):
+        handler_types = set()
+        for model in self._handlers:
+            handler_types.add(self._handlers[model].DB_TYPE)
+        if len(handler_types) != 1:
+            raise ValueError(
+                "Inconsistent model configuration. Expected just one type of models, but got {}: {}".format(
+                    len(handler_types), handler_types))
+
     def __getitem__(self, item):
         """
         Returns the model specification
@@ -146,6 +157,7 @@ class FieldSpec:
     """
     The generation logic for mock values for fields.
     """
+
     def __init__(self, func, *args, **kwargs):
         """
         The mocked values of the fields will be generated as func(*args, **kwargs)
