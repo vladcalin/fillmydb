@@ -1,9 +1,15 @@
 from setuptools import setup
 
+from fillmydb import __author__, __version__
+
+with open("README.md", "r") as readme:
+    long_description = readme.read()
+
 setup(
     name="fillmydb",
-    version="0.1.0",
+    version=__version__,
     description="Fill your database with mocked instances.",
+    long_description=long_description,
     license="MIT",
     author="Calin Vlad",
     author_email="vlad.s.calin@gmail.com",
@@ -20,6 +26,13 @@ setup(
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Topic :: Database"
+    ],
+
+    # tests
+
+    test_suite="tests",
+    test_requires=[
+        "peewee", "sqlalchemy", "django"
     ],
 
     # dependencies

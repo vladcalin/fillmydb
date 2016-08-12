@@ -116,6 +116,9 @@ class ModelWrapper:
         Generates and persists items. *counts* is a list of integers that indicate how many instances of each model
         should generate. The order is preserved from the models specified in constructor.
         """
+        if len(counts) != len(self._initial_order):
+            raise ValueError("The number of count items does not match the model count")
+
         queue = self._ProcessingQueue(*self._handlers.values())
         queue.initial_order()
         while len(queue) != 0:
