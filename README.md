@@ -5,6 +5,13 @@ Wrap you ORM model into a `ModelWrapper`, specify how your fields should look
 like and then generate how many instances you want of each model.
 
 
+## Installation
+
+- `pip install fillmydb[peewee]` if you plan to use it with peewee models
+- `pip install fillmydb[django]` if you plan to use it with djanog models **(not implemented yet)**
+- `pip install fillmydb[sqlalchemy]` if you plan to use it with sqlalchemy models **(not implemented yet)**
+
+
 ## Usage with [`fake-factory`](https://github.com/joke2k/faker)
 
 

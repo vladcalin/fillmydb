@@ -31,7 +31,7 @@ setup(
     # tests
 
     test_suite="tests",
-    test_requires=[
+    test_require=[
         "peewee", "sqlalchemy", "django"
     ],
 
