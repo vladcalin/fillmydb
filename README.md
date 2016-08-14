@@ -1,4 +1,10 @@
 # fillmydb
+
+[![Build Status](https://travis-ci.org/vladcalin/fillmydb.svg?branch=master)](https://travis-ci.org/vladcalin/fillmydb)
+[![Coverage Status](https://coveralls.io/repos/github/vladcalin/fillmydb/badge.svg?branch=master)](https://coveralls.io/github/vladcalin/fillmydb?branch=master)
+[![Documentation Status](https://readthedocs.org/projects/fillmydb/badge/?version=latest)](http://fillmydb.readthedocs.io/en/latest/?badge=latest)
+
+
 Fill your database with mocked instances.
 
 Wrap you ORM model into a `ModelWrapper`, specify how your fields should look
