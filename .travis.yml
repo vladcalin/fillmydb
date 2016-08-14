@@ -8,7 +8,8 @@ python:
   - "nightly" # currently points to 3.6-dev
 install:
   - "pip install -r requirements.txt"
-  - "pip install coveralls"
+  - "pip install peewee"
+  - "pip install coveralls" # for coveralls.io reporting
 script:
   - python -m unittest discover tests
   - coverage run --source=fillmydb -m unittest discover tests
