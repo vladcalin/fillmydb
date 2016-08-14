@@ -58,6 +58,13 @@ class ModelWrapper:
                 ["{}={}".format(field, getattr(self, field)) for field in self._fields]))
 
     def __init__(self, *models):
+        """
+        Creates a wrapper around the *models* models that must be of the same type.
+
+        :param models: The models to be wrapped and used afterwards for generating instances.
+        :raises ValueError: when the models are not of the same type (belong to different ORMs)
+        """
+
         # used for determining how many instances of each model should generate
         self._initial_order = models
 
@@ -101,7 +108,7 @@ class ModelWrapper:
         if peewee and issubclass(model, peewee.Model):
             return PeeweeHandler(model)
 
-    def model_has_unresolved_reference(self, model):
+    def _model_has_unresolved_reference(self, model):
         """
         Determines if the model has unresolved referenced models. This is needed because in order to generate
         instances of a model, first we must generate instances of the models that are referenced through foreign keys.
@@ -115,6 +122,17 @@ class ModelWrapper:
         """
         Generates and persists items. *counts* is a list of integers that indicate how many instances of each model
         should generate. The order is preserved from the models specified in constructor.
+
+        For example, if ``wrapper`` was declared as ``ModelWrapper(Model1, Model2, Model3)`` the following code
+
+        .. code-block:: python
+
+            wrapper.generate(10, 20, 15)
+
+        will generate 10 instances of ``Model1``, 20 instances of ``Model2`` and 15 instances of ``Model3``.
+
+        :param counts: the quantity of each item to be generated.
+        :return: None
         """
         if len(counts) != len(self._initial_order):
             raise ValueError("The number of count items does not match the model count")
@@ -123,16 +141,16 @@ class ModelWrapper:
         queue.initial_order()
         while len(queue) != 0:
             item = queue.get_next_item()
-            if self.model_has_unresolved_reference(item.model):
+            if self._model_has_unresolved_reference(item.model):
                 queue.put_item_back(item)
                 continue
 
             count = counts[self._initial_order.index(item.model)]
             print("Generating {} instances of {}".format(count, item.model.__name__))
-            self.generate_instances(item, count)
+            self._generate_instances(item, count)
             self._processed[item.model] = True
 
-    def generate_instances(self, handler, count):
+    def _generate_instances(self, handler, count):
         """
         Generates *count* instances of the model wrapped in *handler*. Only for internal use.
         :param handler:
@@ -163,13 +181,22 @@ class FieldSpec:
 
     def __init__(self, func, *args, **kwargs):
         """
-        The mocked values of the fields will be generated as func(*args, **kwargs)
+        The mocked values of the fields will be generated as ``func(*args, **kwargs)``.
+
+        :param func: a callable object.
+        :param args: the ordinal parameters ``func`` will be called with.
+        :param kwargs: the named parameters ``func`` will be called with.
         """
         self.func = func
         self.args = args
         self.kwargs = kwargs
 
     def resolve(self):
+        """
+        Method that returns the generated value.
+
+        :return: an object that will be directly assigned to the field when instantiating a model.
+        """
         return self.func(*self.args, **self.kwargs)
 
     def __repr__(self):
