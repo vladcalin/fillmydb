@@ -4,6 +4,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/vladcalin/fillmydb/badge.svg?branch=master)](https://coveralls.io/github/vladcalin/fillmydb?branch=master)
 [![Documentation Status](https://readthedocs.org/projects/fillmydb/badge/?version=latest)](http://fillmydb.readthedocs.io/en/latest/?badge=latest)
 [![PyPI version](https://badge.fury.io/py/fillmydb.svg)](https://badge.fury.io/py/fillmydb)
+[![Code Health](https://landscape.io/github/vladcalin/fillmydb/master/landscape.svg?style=flat)](https://landscape.io/github/vladcalin/fillmydb/master)
 
 
 Fill your database with mocked instances.
