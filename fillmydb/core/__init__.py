@@ -1,10 +1,52 @@
 try:
     import peewee
 
-    from fillmydb.handlers.peewee import PeeweeHandler
+    from fillmydb.handlers.peewee_handler import PeeweeHandler
 except ImportError:
     peewee = None
     PeeweeHandler = None
+
+try:
+    import django
+    from django.db.models import Model as DjangoModel
+    from fillmydb.handlers.django_handler import DjangoHandler
+except ImportError:
+    django = None
+    DjangoHandler = None
+
+import importlib.machinery
+import importlib.util
+import os
+import sys
+
+IS_PY35 = sys.version_info >= (3, 5)
+
+
+def initialize_django(settings_py_path):
+    """
+    Initializes the environment required by Django. Must be called **before** importing your models::
+
+        import fillmydb
+        fillmydb.initialize_django("path/to/settings.py")
+
+        from mydjangoproject.myapp.models import MyModel, MyOtherModel
+
+        ...
+
+    :param settings_py_path: Path to the ``settings.py`` file from your Django project.
+    """
+    if not django:
+        raise RuntimeError("Module 'django' could not be imported")
+
+    if IS_PY35:
+        spec = importlib.util.spec_from_file_location("django_settings", settings_py_path)
+        django_settings = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(django_settings)
+    else:
+        django_settings = importlib.machinery.SourceFileLoader("django_settings", settings_py_path).load_module()
+
+    os.environ["DJANGO_SETTINGS_MODULE"] = "django_settings"
+    django.setup()
 
 
 class ModelWrapper:
@@ -108,6 +150,9 @@ class ModelWrapper:
         if peewee and issubclass(model, peewee.Model):
             return PeeweeHandler(model)
 
+        if django and issubclass(model, DjangoModel):
+            return DjangoHandler(model)
+
     def _model_has_unresolved_reference(self, model):
         """
         Determines if the model has unresolved referenced models. This is needed because in order to generate
@@ -206,7 +251,7 @@ class FieldSpec:
 
 
 if __name__ == '__main__':
-    from tests.models import User, Post, Like
+    from tests.data.peewee_models import User, Post, Like
 
     import faker
 
@@ -221,7 +266,7 @@ if __name__ == '__main__':
     wrapper[User].email = FieldSpec(factory.email)
     wrapper[User].visits = FieldSpec(factory.pyint)
 
-    wrapper[Post].title = FieldSpec(lambda _: "test", 1)
+    wrapper[Post].title = FieldSpec(factory.sentence)
     wrapper[Post].text = FieldSpec(factory.text)
 
     wrapper.generate(10, 10, 10)

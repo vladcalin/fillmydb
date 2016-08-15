@@ -7,11 +7,10 @@ class PeeweeHandler(BaseHandler):
     DB_TYPE = "peewee"
 
     def __init__(self, model):
-        self.model = model
+        super(PeeweeHandler, self).__init__(model)
 
+    def create_table_if_not_exists(self):
         self.model.create_table(fail_silently=True)
-        self.fields, self.fields_names = self.get_fields()
-        self.ref_models = self.get_referenced_models()
 
     def get_fields(self):
         fields = []

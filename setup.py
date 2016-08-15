@@ -2,7 +2,7 @@ from setuptools import setup
 
 from fillmydb import __author__, __version__
 
-with open("README.rst", "r") as readme:
+with open("long_descr.rst", "r") as readme:
     long_description = readme.read()
 
 setup(

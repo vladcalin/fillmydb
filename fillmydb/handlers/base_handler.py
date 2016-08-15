@@ -6,6 +6,17 @@ class BaseHandler(metaclass=abc.ABCMeta):
     Base class for database model handlers.
     """
 
+    def __init__(self, model):
+        self.model = model
+
+        self.create_table_if_not_exists()
+        self.fields, self.fields_names = self.get_fields()
+        self.ref_models = self.get_referenced_models()
+
+    @abc.abstractmethod
+    def create_table_if_not_exists(self):
+        pass
+
     @abc.abstractmethod
     def get_fields(self):
         """

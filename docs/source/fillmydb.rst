@@ -6,3 +6,5 @@ The fillmydb module
 
 .. autoclass:: fillmydb.FieldSpec
     :members:
+
+.. autofunction:: fillmydb.initialize_django
