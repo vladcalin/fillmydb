@@ -3,6 +3,11 @@ Usage
 
 Value generation consists in the following steps:
 
+.. warning::
+
+    If you plan on using wrapping Django models, you must call the :py:func:`fillmydb.initialize_django` function
+    **before importing your models**.
+
 
 1. Wrap your models in a :py:class:`fillmydb.ModelWrapper` like this::
 

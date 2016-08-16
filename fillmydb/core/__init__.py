@@ -14,10 +14,10 @@ except ImportError:
     django = None
     DjangoHandler = None
 
-import importlib.machinery
-import importlib.util
 import os
 import sys
+import importlib.machinery
+import importlib.util
 
 IS_PY35 = sys.version_info >= (3, 5)
 

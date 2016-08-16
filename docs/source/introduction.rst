@@ -13,6 +13,7 @@ in order to determine how each filed should look like and then generate instance
 The supported model types so far are:
 
 - `peewee <http://docs.peewee-orm.com/en/latest/>`_
+- `django <https://www.djangoproject.com/>`_
 
 .. warning::
 
@@ -41,3 +42,4 @@ References
 
 - `fake-factory <https://github.com/joke2k/faker>`_ - generates good-looking test data
 - `peewee <http://docs.peewee-orm.com/en/latest/>`_ - a nice ORM for SQLite, PostgreSQL, MySQL and others.
+- `django <https://www.djangoproject.com/>`_ - a full-stack web framework.
