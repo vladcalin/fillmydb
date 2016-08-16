@@ -1,6 +1,8 @@
 import peewee
 
-_db = peewee.SqliteDatabase("test.db")
+
+DB_NAME = "test2.db"
+database_obj = peewee.SqliteDatabase("test2.db")
 
 
 class User(peewee.Model):
@@ -14,7 +16,7 @@ class User(peewee.Model):
     description = peewee.CharField()
 
     class Meta:
-        database = _db
+        database = database_obj
 
 
 class Post(peewee.Model):
@@ -24,7 +26,7 @@ class Post(peewee.Model):
     by_user = peewee.ForeignKeyField(User)
 
     class Meta:
-        database = _db
+        database = database_obj
 
 
 class Like(peewee.Model):
@@ -32,4 +34,4 @@ class Like(peewee.Model):
     to_post = peewee.ForeignKeyField(Post)
 
     class Meta:
-        database = _db
+        database = database_obj
