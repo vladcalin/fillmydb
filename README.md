@@ -70,6 +70,26 @@ Generating instances for multipe models:
 
 ```
 
+Also, the :py:module:`pymockdata` offers a set of helpers that wraps most common methods used for 
+fake data generation through the [`fake-factory`](https://github.com/joke2k/faker) module.
+
+```python
+    
+    from tests.models import User, Post, Like
+    wrapper = ModelWrapper(User, Like, Post)
+    
+    wrapper[User].name = Name()
+    wrapper[User].username = Username()
+    wrapper[User].description = Paragraph(nb_sentences=3)
+    wrapper[User].password_hash = Sha256()
+    wrapper[User].email = Email()
+    wrapper[User].visits = Integer(min=100, max=200)
+
+    wrapper[Post].title = Sentence(nb_words=7)
+    wrapper[Post].text = Paragraph(nb_sentences=10)
+
+```
+
 ## General workflow
 
 Pseudo-code:
