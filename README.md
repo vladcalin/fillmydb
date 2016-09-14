@@ -70,7 +70,7 @@ Generating instances for multipe models:
 
 ```
 
-Also, the :py:module:`pymockdata` offers a set of helpers that wraps most common methods used for 
+Also, the `fillmydb` module offers a set of helpers that wraps most common methods used for 
 fake data generation through the [`fake-factory`](https://github.com/joke2k/faker) module.
 
 ```python
